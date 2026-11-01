@@ -53,7 +53,10 @@ def run(overrides, timeout=60):
     env = dict(os.environ)
     env.update({"atom_data_dir": directory, "atom_data_input": "input.json",
                 "atom_data_output": "output.json", "atom_workspace": directory})
-    proc = subprocess.run([JAVA, "-cp", JAR, "com.jenkinschina.atom.sdk.AtomRunner"], cwd=directory, env=env,
+    # Pin the JVM's default zone away from the host's: the RFC 5424 frame must be GMT regardless of where this runs,
+    # and on a UTC machine "local time" would look identical to GMT and hide that bug.
+    proc = subprocess.run([JAVA, "-Duser.timezone=Asia/Shanghai", "-cp", JAR,
+                           "com.jenkinschina.atom.sdk.AtomRunner"], cwd=directory, env=env,
                           capture_output=True, text=True, timeout=timeout)
     out = os.path.join(directory, "output.json")
     result = json.load(open(out, encoding="utf-8")) if os.path.exists(out) else {}
