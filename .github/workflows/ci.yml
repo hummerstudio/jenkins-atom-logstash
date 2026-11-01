@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  atom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      # the atom is built against the SDK and packages it, so CI builds the SDK first
+      - uses: actions/checkout@v4
+        with:
+          repository: hummerstudio/jenkins-atom-sdk
+          path: jenkins-atom-sdk
+      - name: Build the SDK
+        working-directory: jenkins-atom-sdk
+        run: mvn -B -ntp -q package -DskipTests
+      - name: Build and smoke test the atom
+        run: ./tools/smoke.sh
+      - name: Mutations must be caught
+        run: python3 tools/mutations.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: logstash-atom
+          path: dist/logstash/

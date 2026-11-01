@@ -1,0 +1,275 @@
+{
+  "atomCode": "logstash",
+  "name": "Logstash build payload",
+  "version": "1.0.0",
+  "description": "Sends the logstash plugin's build payload (BuildData + log lines) to a Logstash indexer over syslog/UDP, Redis RPUSH or Elasticsearch HTTP, with the plugin's header and message rules.",
+  "execution": {
+    "packagePath": "logstash.jar",
+    "language": "java",
+    "target": "$atom_java_path -cp logstash.jar com.jenkinschina.atom.sdk.AtomRunner"
+  },
+  "input": {
+    "indexer": {
+      "label": "indexer：syslog（UDP）/ redis（RPUSH）/ elasticsearch（HTTP POST）",
+      "type": "vuex-input",
+      "default": "syslog"
+    },
+    "host": {
+      "label": "主机（syslog/redis；插件里 SyslogDao 也把它写进报文头 hostname）",
+      "type": "vuex-input",
+      "default": "127.0.0.1"
+    },
+    "port": {
+      "label": "端口（留空：syslog 519，redis 6379）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "syslogFormat": {
+      "label": "syslog 格式：rfc3164 / rfc5424",
+      "type": "vuex-input",
+      "default": "rfc3164"
+    },
+    "redisKey": {
+      "label": "Redis key（RPUSH 的目标，插件默认 logstash）",
+      "type": "vuex-input",
+      "default": "logstash"
+    },
+    "redisPassword": {
+      "label": "Redis 密码（留空不 AUTH）",
+      "type": "password",
+      "default": ""
+    },
+    "esUri": {
+      "label": "Elasticsearch URI（含索引，如 http://localhost:9200/logstash）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "esUsername": {
+      "label": "Elasticsearch 用户名（留空不写 Authorization）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "esPassword": {
+      "label": "Elasticsearch 密码",
+      "type": "password",
+      "default": ""
+    },
+    "mimeType": {
+      "label": "Elasticsearch Content-Type（留空为 application/json; charset=UTF-8）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "jenkinsUrl": {
+      "label": "source_host：Jenkins 根地址（插件取 Jenkins.getRootUrl()，留空则不发该字段）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "message": {
+      "label": "要发送的日志（多行；插件发的是 build.getLog(maxLines)）",
+      "type": "textarea",
+      "default": ""
+    },
+    "maxLines": {
+      "label": "最多发送最后多少行（0=不发，负数=全部；插件默认取配置值）",
+      "type": "vuex-input",
+      "default": "100"
+    },
+    "projectName": {
+      "label": "projectName（默认 ${JOB_NAME}，插件是 parent.getName() 短名）",
+      "type": "vuex-input",
+      "default": "${JOB_NAME}"
+    },
+    "fullProjectName": {
+      "label": "fullProjectName（默认同 projectName）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "displayName": {
+      "label": "displayName（默认 #<buildNumber>）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "fullDisplayName": {
+      "label": "fullDisplayName（默认 fullProjectName + displayName）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "buildId": {
+      "label": "id（默认同 buildNumber；Run#getId）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "buildNumber": {
+      "label": "buildNum（默认 ${BUILD_NUMBER}）",
+      "type": "vuex-input",
+      "default": "${BUILD_NUMBER}"
+    },
+    "result": {
+      "label": "result（默认 ${BUILD_STATUS}；留空则不写该字段，对应构建未结束）",
+      "type": "vuex-input",
+      "default": "${BUILD_STATUS}"
+    },
+    "description": {
+      "label": "description（插件写 build.getDescription()，不在时是空串）",
+      "type": "textarea",
+      "default": ""
+    },
+    "buildUrl": {
+      "label": "url（构建地址）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "node": {
+      "label": "buildHost 兜底（默认 ${NODE_NAME}，再兜底 master）",
+      "type": "vuex-input",
+      "default": "${NODE_NAME}"
+    },
+    "buildHost": {
+      "label": "buildHost（留空用 node）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "label": {
+      "label": "buildLabel 兜底（默认 master）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "buildLabel": {
+      "label": "buildLabel（留空用 label）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "stageName": {
+      "label": "stageName（pipeline 的 logstash 步骤才有）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "agentName": {
+      "label": "agentName（pipeline 的 logstash 步骤才有）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "rootProjectName": {
+      "label": "rootProjectName（默认同 projectName）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "rootFullProjectName": {
+      "label": "rootFullProjectName（默认同 fullProjectName）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "rootProjectDisplayName": {
+      "label": "rootProjectDisplayName（默认同 displayName）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "rootBuildNum": {
+      "label": "rootBuildNum（默认同 buildNumber）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "buildDurationMs": {
+      "label": "buildDuration 毫秒（留空/0 用 now - buildTimestampMs）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "buildVariables": {
+      "label": "buildVariables（每行 key=value）",
+      "type": "textarea",
+      "default": ""
+    },
+    "maskedVariables": {
+      "label": "要从 buildVariables 里剔除的键（逗号分隔，对应 sensitiveBuildVariables）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "testsTotal": {
+      "label": "测试总数（留空则不写 testResults）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "testsSkipped": {
+      "label": "跳过数",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "testsFailed": {
+      "label": "失败数",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "failedTests": {
+      "label": "失败用例（每行 fullName|errorDetails）",
+      "type": "textarea",
+      "default": ""
+    },
+    "buildTimestampMs": {
+      "label": "构建开始时间（epoch 毫秒；@buildTimestamp 与 buildDuration 兜底）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "timestampMs": {
+      "label": "@timestamp（epoch 毫秒，留空用当前时间）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "timezone": {
+      "label": "时区（如 Asia/Shanghai；留空用运行环境默认，插件用控制器默认时区）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "millisecondTimestamps": {
+      "label": "时间戳带毫秒（true=yyyy-MM-dd'T'HH:mm:ss.SSSZ，false=旧格式）",
+      "type": "vuex-input",
+      "default": "true"
+    },
+    "dryRun": {
+      "label": "只组报文不发（true/false）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "failOnError": {
+      "label": "发送失败是否让构建失败（默认 true；插件 failBuild 默认关）",
+      "type": "vuex-input",
+      "default": "true"
+    },
+    "timeoutSeconds": {
+      "label": "超时秒数",
+      "type": "vuex-input",
+      "default": "30"
+    }
+  },
+  "output": {
+    "indexer": {
+      "type": "string",
+      "description": "syslog / redis / elasticsearch"
+    },
+    "target": {
+      "type": "string",
+      "description": "host:port 或 ES 的 URI"
+    },
+    "lines": {
+      "type": "string",
+      "description": "发出去的消息行数"
+    },
+    "bytes": {
+      "type": "string",
+      "description": "payload 的 UTF-8 字节数"
+    },
+    "reply": {
+      "type": "string",
+      "description": "传输层回执（udp 字节数 / rpush 长度 / http 状态）"
+    },
+    "payload": {
+      "type": "string",
+      "description": "实际发出的 JSON（dry run 也返回它）"
+    }
+  },
+  "x-jenkins": {
+    "protocol": "jenkins-1",
+    "requires": {
+      "runner": ">=0.4.0"
+    }
+  }
+}

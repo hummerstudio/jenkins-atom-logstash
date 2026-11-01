@@ -1,0 +1,11 @@
+{
+  "name": "Logstash build payload",
+  "summary": "Sends the logstash plugin's BuildData payload to a Logstash indexer over syslog/UDP, Redis RPUSH or Elasticsearch HTTP, with the plugin's CEE prefix, syslog header, RESP command and content type.",
+  "author": "hummerstudio",
+  "license": "MIT",
+  "tags": [
+    "official-port",
+    "logstash",
+    "logging"
+  ]
+}
