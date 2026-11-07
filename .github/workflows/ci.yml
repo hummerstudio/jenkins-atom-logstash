@@ -37,4 +37,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: logstash-atom
-          path: atom/dist/logstash/
+          path: atom/target/dist/logstash/
