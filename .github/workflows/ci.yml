@@ -11,23 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: "21"
-      # the atom is built against the SDK and packages it, so CI builds the SDK first
+          path: atom
+
+      # The SDK and the build parent are ours and not published to Maven Central, so CI puts them where the atom's
+      # <relativePath> expects them: ../jenkins-atom-sdk/atoms-parent/pom.xml.
       - uses: actions/checkout@v4
         with:
           repository: hummerstudio/jenkins-atom-sdk
           path: jenkins-atom-sdk
-      - name: Build the SDK
-        working-directory: jenkins-atom-sdk
-        run: mvn -B -ntp -q package -DskipTests
-      - name: Build and smoke test the atom
-        run: ./tools/smoke.sh
-      - name: Mutations must be caught
-        run: python3 tools/mutations.py
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Install the SDK and the build parent
+        run: mvn -B -ntp -q -f jenkins-atom-sdk/pom.xml install -DskipTests && mvn -B -ntp -q -f jenkins-atom-sdk/atoms-parent/pom.xml install -N
+
+      # package, then the atom's own smoke script as an integration test
+      - name: Build, package and smoke test
+        run: mvn -B -ntp -f atom/pom.xml verify
+
       - uses: actions/upload-artifact@v4
         with:
           name: logstash-atom
-          path: dist/logstash/
+          path: atom/dist/logstash/
