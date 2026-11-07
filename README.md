@@ -63,13 +63,13 @@ so a hand-written client could not be proven - the atom refuses the option and s
 
 ## Checks
 
-`tools/check.py` runs the atom the way the runner does and compares the bytes a fake indexer received against a
-recomputation of the plugin's rules: the payload object (field order, types, nulls, transients), the syslog frame for
-both RFCs and both timestamp formats, the RESP command sequence, and the HTTP request. Failures are asserted too
-(refused push, `-ERR`, zero-length push, HTTP 500, unreachable port, `failOnError=false`, dry run, input validation).
+`src/test/java/atom/LogstashIT.java` runs the atom the way the runner does and compares the bytes a fake indexer
+received against a recomputation of the plugin's rules: the payload object (field order, types, nulls, transients),
+the syslog frame for both RFCs and both timestamp formats, the RESP command sequence, and the HTTP request. Failures
+are asserted too (refused push, `-ERR`, zero-length push, HTTP 500, unreachable port, `failOnError=false`, dry run,
+input validation).
 
-`tools/mutations.py` plants 24 bugs one at a time and requires the suite to go red for each.
-
-```
-./tools/smoke.sh --mutations
+```bash
+mvn verify                    # the 22 cases above, against real sockets on ephemeral ports
+python3 tools/mutations.py    # plants 24 bugs one at a time and requires the suite to go red for each
 ```

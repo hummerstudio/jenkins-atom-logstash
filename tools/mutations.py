@@ -93,23 +93,23 @@ def sdk_jar():
         candidates = sorted((root / "target").glob("jenkins-atom-sdk-*.jar"))
         if candidates:
             return str(candidates[-1])
-    raise SystemExit("build the SDK first: cd ../jenkins-atom-sdk && ./build.sh")
+    raise SystemExit("build the SDK first: cd ../jenkins-atom-sdk && mvn -DskipTests package")
 
 
 def build(tree):
     env = dict(os.environ)
     env["SDK_JAR"] = sdk_jar()
-    proc = subprocess.run(["bash", "build.sh"], cwd=tree, env=env, capture_output=True, text=True)
+    proc = subprocess.run(["mvn", "-q", "-B", "-ntp", "-DskipTests", "package"], cwd=tree, env=env, capture_output=True, text=True)
     if proc.returncode != 0:
         return None, proc.stderr[-1500:]
-    return tree / "dist" / CODE / (CODE + ".jar"), proc.stdout
+    return tree / "target" / "dist" / CODE / (CODE + ".jar"), proc.stdout
 
 
 def main():
     failures = 0
     for index, (name, old, new, case) in enumerate(MUTATIONS, 1):
         tree = pathlib.Path(tempfile.mkdtemp(prefix=CODE + "-mut-")) / "atom"
-        shutil.copytree(HERE, tree, ignore=shutil.ignore_patterns("dist", ".git", "__pycache__"))
+        shutil.copytree(HERE, tree, ignore=shutil.ignore_patterns("dist", "target", ".git", "__pycache__"))
         source = tree / SOURCE.relative_to(HERE)
         text = source.read_text()
         if old not in text:
