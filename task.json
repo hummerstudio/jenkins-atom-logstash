@@ -270,6 +270,7 @@
     "protocol": "jenkins-1",
     "requires": {
       "runner": ">=0.4.0"
-    }
+    },
+    "category": "observability"
   }
 }
